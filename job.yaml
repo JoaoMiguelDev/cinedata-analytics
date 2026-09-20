@@ -1,0 +1,34 @@
+resources:
+  jobs:
+    CineData_Pipeline:
+      name: CineData_Pipeline
+      schedule:
+        quartz_cron_expression: 25 0 6 * * ?
+        timezone_id: America/Sao_Paulo
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: setup_environment
+          notebook_task:
+            notebook_path: /Workspace/Users/jmsabarreto67@gmail.com/cinedata_analytics/EnvironmentSetup
+            source: WORKSPACE
+        - task_key: to_Bronze
+          depends_on:
+            - task_key: setup_environment
+          notebook_task:
+            notebook_path: /Workspace/Users/jmsabarreto67@gmail.com/cinedata_analytics/BronzeIngestion
+            source: WORKSPACE
+        - task_key: to_Silver
+          depends_on:
+            - task_key: to_Bronze
+          notebook_task:
+            notebook_path: /Workspace/Users/jmsabarreto67@gmail.com/cinedata_analytics/BronzeToSilver
+            source: WORKSPACE
+        - task_key: to_Gold
+          depends_on:
+            - task_key: to_Silver
+          notebook_task:
+            notebook_path: /Workspace/Users/jmsabarreto67@gmail.com/cinedata_analytics/SilverToGold
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
